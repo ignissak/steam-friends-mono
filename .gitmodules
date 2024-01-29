@@ -1,0 +1,6 @@
+[submodule "steam-friends-vue"]
+	path = steam-friends-vue
+	url = git@github.com:ignissak/steam-friends-vue.git
+[submodule "steam-friends-fastify"]
+	path = steam-friends-fastify
+	url = git@github.com:ignissak/steam-friends-fastify.git
