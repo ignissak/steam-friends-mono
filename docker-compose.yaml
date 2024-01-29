@@ -1,0 +1,42 @@
+version: '3'
+services:
+  cache:
+    image: redis:7.2.4-alpine
+    restart: always
+    ports:
+      - 36231:36231
+    command: redis-server --loglevel notice --port 36231
+    volumes:
+      - cache:/data
+    networks:
+      - backend
+  backend:
+    image: 'steam-backend'
+    build:
+      context: ./steam-friends-fastify
+      dockerfile: Dockerfile
+      target: build-stage
+    ports:
+      - 3000:3000
+    depends_on:
+      - cache
+    networks:
+      - backend
+  app:
+    image: 'steam-frontend'
+    build:
+      context: ./steam-friends-vue
+      dockerfile: Dockerfile
+      target: production-stage
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - backend
+    depends_on:
+      - backend
+volumes:
+  cache:
+    driver: local
+networks:
+  backend:
