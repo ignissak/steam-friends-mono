@@ -1,8 +1,8 @@
-version: '3'
 services:
   cache:
     image: redis:7.2.4-alpine
     restart: always
+    container_name: steam-redis
     ports:
       - 36231:36231
     command: redis-server --loglevel notice --port 36231
@@ -12,6 +12,8 @@ services:
       - backend
   backend:
     image: 'steam-backend'
+    restart: always
+    container_name: steam-backend
     build:
       context: ./steam-friends-fastify
       dockerfile: Dockerfile
@@ -24,6 +26,8 @@ services:
       - backend
   app:
     image: 'steam-frontend'
+    restart: always
+    container_name: steam-frontend
     build:
       context: ./steam-friends-vue
       dockerfile: Dockerfile
