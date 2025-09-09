@@ -31,7 +31,7 @@ services:
     build:
       context: ./steam-friends-vue
       dockerfile: Dockerfile
-      target: production-stage
+      target: build-stage
     ports:
       - 80:80
       - 443:443
