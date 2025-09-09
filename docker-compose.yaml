@@ -3,8 +3,6 @@ services:
     image: redis:7.2.4-alpine
     restart: always
     container_name: steam-redis
-    ports:
-      - 36231:36231
     command: redis-server --loglevel notice --port 36231
     volumes:
       - cache:/data
@@ -18,12 +16,25 @@ services:
       context: ./steam-friends-fastify
       dockerfile: Dockerfile
       target: build-stage
-    ports:
-      - 3000:3000
     depends_on:
       - cache
     networks:
       - backend
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.steam-api.entrypoints=http"
+      - "traefik.http.routers.steam-api.rule=Host(`steam.bordas.sk`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.steam-api.middlewares=https-redirect@file"
+
+      # HTTPS router
+      - "traefik.http.routers.steam-api-secure.entrypoints=https"
+      - "traefik.http.routers.steam-api-secure.rule=Host(`steam.bordas.sk`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.steam-api-secure.tls=true"
+      - "traefik.http.routers.steam-api-secure.tls.certresolver=le"
+      - "traefik.http.routers.steam-api-secure.service=steam-api"
+      - "traefik.http.routers.steam-api-secure.middlewares=sslheader"
+
+      - "traefik.http.services.steam-api.loadbalancer.server.port=3000"
   app:
     image: ghcr.io/ignissak/steam-friends-vue:main
     restart: always
@@ -32,13 +43,26 @@ services:
       context: ./steam-friends-vue
       dockerfile: Dockerfile
       target: build-stage
-    ports:
-      - 80:80
-      - 443:443
     networks:
       - backend
     depends_on:
       - backend
+    # traefik labels
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.steam-bordas.entrypoints=http"
+      - "traefik.http.routers.steam-bordas.rule=Host(`steam.bordas.sk`)"
+      - "traefik.http.routers.steam-bordas.middlewares=https-redirect@file"
+
+      # HTTPS router
+      - "traefik.http.routers.steam-bordas-secure.entrypoints=https"
+      - "traefik.http.routers.steam-bordas-secure.rule=Host(`steam.bordas.sk`)"
+      - "traefik.http.routers.steam-bordas-secure.tls=true"
+      - "traefik.http.routers.steam-bordas-secure.tls.certresolver=le"
+      - "traefik.http.routers.steam-bordas-secure.service=steam-bordas"
+      - "traefik.http.routers.steam-bordas-secure.middlewares=sslheader"
+
+      - "traefik.http.services.steam-bordas.loadbalancer.server.port=80"
 volumes:
   cache:
     driver: local
