@@ -16,6 +16,8 @@ services:
       context: ./steam-friends-fastify
       dockerfile: Dockerfile
       target: build-stage
+    env_file:
+      - ./steam-friends-fastify/.env
     depends_on:
       - cache
     networks:
@@ -45,6 +47,8 @@ services:
       target: build-stage
     networks:
       - backend
+    env_file:
+      - ./steam-friends-vue/.env
     depends_on:
       - backend
     # traefik labels
